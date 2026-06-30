@@ -6,3 +6,10 @@ services:
     env_file:
       - .env
     restart: unless-stopped
+    networks:
+      - admin_cdp_net
+
+networks:
+  admin_cdp_net:
+    name: admin_cdp_net
+    driver: bridge
