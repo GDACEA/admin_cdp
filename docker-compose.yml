@@ -7,9 +7,9 @@ services:
       - .env
     restart: unless-stopped
     networks:
-      - admin_cdp_net
+      - webapp_cdp_static_net
 
 networks:
-  admin_cdp_net:
-    name: admin_cdp_net
-    driver: bridge
+  webapp_cdp_static_net:
+    external: true
+    name: webapp_cdp_static_net
