@@ -95,3 +95,12 @@ niveles. Los puertos de Docker y Streamlit usan una unica pareja de variables.
    archivos `__pycache__/*.pyc`, que ya estan ignorados pero siguen rastreados.
 5. Validar conectividad real con PostgreSQL, Entra ID y Power BI en el entorno
    de despliegue; esas integraciones externas no pueden probarse sin acceso.
+
+## 9. Perfil de Microsoft Graph
+
+La aplicación solicita el permiso delegado `User.Read` y usa el access token solo
+durante el callback para consultar `/v1.0/me` y `/v1.0/me/photo/$value`. El token
+no se guarda en `st.session_state`, archivos ni logs. En Azure Entra ID, la
+aplicación registrada debe tener habilitados `openid`, `profile`, `email` y el
+permiso delegado Microsoft Graph `User.Read`; un administrador debe conceder
+consentimiento si la política del tenant lo exige.

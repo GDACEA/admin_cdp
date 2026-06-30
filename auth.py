@@ -14,15 +14,20 @@ from typing import Any
 from urllib.parse import urlencode
 
 import msal
+import requests
 import streamlit as st
 from dotenv import load_dotenv
 
 load_dotenv()
 
 AUTH_SESSION_KEYS = (
-    "authenticated", "email", "username", "display_name",
-    "tenant_id", "roles", "login_time",
+    "authenticated", "email", "username", "name", "display_name", "user_id",
+    "profile_photo", "graph_notice", "tenant_id", "roles", "login_time",
 )
+
+GRAPH_BASE_URL = "https://graph.microsoft.com/v1.0"
+GRAPH_SCOPES = ["User.Read"]
+GRAPH_TIMEOUT_SECONDS = 10
 
 
 class AuthenticationError(Exception):
@@ -166,15 +171,82 @@ def _validate_claims(claims: dict[str, Any], config: dict[str, Any]) -> dict[str
     roles = claims.get("roles", [])
     if isinstance(roles, str):
         roles = [roles]
+    display_name = str(claims.get("name") or username)
     return {
         "authenticated": True,
         "email": email,
         "username": username,
-        "display_name": str(claims.get("name") or username),
+        "name": display_name,
+        "display_name": display_name,
+        "user_id": str(claims.get("oid") or claims.get("sub") or ""),
+        "profile_photo": None,
+        "graph_notice": None,
         "tenant_id": tenant_id,
         "roles": list(roles),
         "login_time": datetime.now(timezone.utc).isoformat(),
     }
+
+
+def _load_graph_profile(access_token: str, identity: dict[str, Any]) -> dict[str, Any]:
+    """Completa el perfil sin persistir ni registrar el token de Graph."""
+    headers = {"Authorization": f"Bearer {access_token}"}
+    try:
+        profile_response = requests.get(
+            f"{GRAPH_BASE_URL}/me",
+            headers=headers,
+            params={"$select": "id,displayName,mail,userPrincipalName"},
+            timeout=GRAPH_TIMEOUT_SECONDS,
+        )
+    except requests.RequestException:
+        identity["graph_notice"] = "No fue posible consultar el perfil de Microsoft Graph."
+        return identity
+
+    if profile_response.status_code == 401:
+        identity["graph_notice"] = "La sesión de Microsoft expiró. Cierra sesión e ingresa nuevamente."
+        return identity
+    if profile_response.status_code == 403:
+        identity["graph_notice"] = "Microsoft Graph no autorizó el perfil. Un administrador debe conceder User.Read."
+        return identity
+    if not profile_response.ok:
+        identity["graph_notice"] = "Microsoft Graph devolvió una respuesta inesperada para el perfil."
+        return identity
+
+    try:
+        profile = profile_response.json()
+    except ValueError:
+        identity["graph_notice"] = "Microsoft Graph devolvió un perfil inválido."
+        return identity
+    if not isinstance(profile, dict) or not profile.get("id"):
+        identity["graph_notice"] = "Microsoft Graph devolvió un perfil incompleto."
+        return identity
+
+    graph_email = str(profile.get("mail") or profile.get("userPrincipalName") or "").strip().lower()
+    # Conservamos el correo validado del token si Graph no entrega uno utilizable.
+    if "@" in graph_email:
+        identity["email"] = graph_email
+    identity["name"] = str(profile.get("displayName") or identity["name"])
+    identity["display_name"] = identity["name"]
+    identity["user_id"] = str(profile["id"])
+
+    try:
+        photo_response = requests.get(
+            f"{GRAPH_BASE_URL}/me/photo/$value",
+            headers=headers,
+            timeout=GRAPH_TIMEOUT_SECONDS,
+        )
+    except requests.RequestException:
+        return identity  # La foto es opcional; la UI mostrará las iniciales.
+
+    if photo_response.ok and photo_response.content:
+        identity["profile_photo"] = photo_response.content
+    elif photo_response.status_code == 401:
+        identity["graph_notice"] = "La sesión de Microsoft expiró. Cierra sesión e ingresa nuevamente."
+    elif photo_response.status_code == 403:
+        identity["graph_notice"] = "Microsoft Graph no autorizó la foto. Un administrador debe conceder User.Read."
+    # 404 es el caso normal de una cuenta sin foto y no se muestra como error.
+    elif photo_response.status_code != 404:
+        identity["graph_notice"] = "Microsoft Graph no pudo entregar la foto de perfil."
+    return identity
 
 
 def _session_is_current(config: dict[str, Any]) -> bool:
@@ -192,7 +264,7 @@ def _begin_login(config: dict[str, Any]) -> None:
     state = _create_state(config)
     payload = _validate_state(state, config)
     auth_uri = _msal_app(config).get_authorization_request_url(
-        scopes=[],
+        scopes=GRAPH_SCOPES,
         redirect_uri=config["redirect_uri"],
         state=state,
         nonce=payload["nonce"],
@@ -223,7 +295,7 @@ def require_authentication() -> dict[str, Any]:
         try:
             result = _msal_app(config).acquire_token_by_authorization_code(
                 code=st.query_params["code"],
-                scopes=[],
+                scopes=GRAPH_SCOPES,
                 redirect_uri=config["redirect_uri"],
                 nonce=state_payload["nonce"],
             )
@@ -236,9 +308,14 @@ def require_authentication() -> dict[str, Any]:
             message = result.get("error_description") or result.get("error")
             raise AuthenticationError(f"No fue posible completar la autenticación: {message}")
         identity = _validate_claims(result.get("id_token_claims", {}), config)
+        access_token = result.get("access_token")
+        if access_token:
+            identity = _load_graph_profile(access_token, identity)
+        else:
+            identity["graph_notice"] = "Microsoft no entregó acceso a Graph. Verifica el permiso User.Read."
         for key, value in identity.items():
             st.session_state[key] = value
-        # Los tokens nunca se guardan en session_state ni se registran.
+        # El access token se usa solo durante el callback; nunca se persiste ni registra.
         st.rerun()
 
     _begin_login(config)

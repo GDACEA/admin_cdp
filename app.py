@@ -1,4 +1,6 @@
 import importlib
+import base64
+import html
 
 import pandas as pd
 import streamlit as st
@@ -152,6 +154,38 @@ def render_sidebar():
 
         st.write("---")
 
+        # Perfil bajo el último control de navegación.
+        avatar_col, details_col = st.columns([1, 3], vertical_alignment="center")
+        name = st.session_state.get("name") or st.session_state.get("display_name") or "Usuario"
+        email = st.session_state.get("email", "")
+        photo = st.session_state.get("profile_photo")
+        with avatar_col:
+            if photo:
+                encoded_photo = base64.b64encode(photo).decode("ascii")
+                st.markdown(
+                    f'<img src="data:image/jpeg;base64,{encoded_photo}" '
+                    'style="width:56px;height:56px;border-radius:50%;object-fit:cover" '
+                    'alt="Foto de perfil">',
+                    unsafe_allow_html=True,
+                )
+            else:
+                initials = "".join(part[0] for part in name.split()[:2] if part).upper() or "U"
+                st.markdown(
+                    '<div style="width:56px;height:56px;border-radius:50%;background:#e5e7eb;'
+                    'display:flex;align-items:center;justify-content:center;font-weight:700;'
+                    f'color:#374151" aria-label="Avatar">{html.escape(initials)}</div>',
+                    unsafe_allow_html=True,
+                )
+        with details_col:
+            st.markdown(f"**{html.escape(name)}**")
+            st.caption(email)
+
+        if st.session_state.get("graph_notice"):
+            st.caption(st.session_state["graph_notice"])
+
+        if st.button("Cerrar sesión", use_container_width=True):
+            logout()
+
         return selected_page
 
 
@@ -198,14 +232,6 @@ def main():
     selected_page = render_sidebar()
 
     cargar_vista(selected_page)
-
-    with st.sidebar:
-        st.write("---")
-        st.subheader("Sesión")
-
-        if st.button("Cerrar sesión", use_container_width=True):
-            logout()
-
 
 if __name__ == "__main__":
     main()
