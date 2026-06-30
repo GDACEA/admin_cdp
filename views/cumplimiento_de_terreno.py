@@ -1,14 +1,15 @@
 import streamlit as st
 import streamlit.components.v1 as components
+import config
 
 def render():
     st.title("Cumplimiento de terreno")
 
-    powerbi_url = "https://app.powerbi.com/view?r=eyJrIjoiYjI3MTMwZWMtOTg4NS00NjQ4LTg0MDQtMjc4ZDk5MTM3Y2U3IiwidCI6ImU2YzcyN2QxLTVmODUtNDcxMy1iYzI0LTJjMzgyZTVkM2E5OSJ9"
+    powerbi_url = config.POWERBI_URL
 
-    scale = 0.60
+    scale = config.POWERBI_SCALE
     iframe_width = 100 / scale
-    iframe_height = 1680
+    iframe_height = config.POWERBI_IFRAME_HEIGHT
     container_height = int(iframe_height * scale)
 
     components.html(

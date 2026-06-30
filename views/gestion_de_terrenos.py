@@ -6,32 +6,17 @@ from streamlit_folium import st_folium
 import variables as vars
 from io import BytesIO
 import io
-import os
 from collections.abc import Iterable
-
-def get_db_url(secret_key: str, env_key: str, fallback: str) -> str:
-    try:
-        return st.secrets["connections"][secret_key]
-    except Exception:
-        return os.getenv(env_key, fallback)
-
+import config
 
 engine = create_engine(
-    get_db_url(
-        "gda_url",
-        "GDA_DATABASE_URL",
-        "postgresql://gda_prod:Cea2025.!@172.20.4.17:5432/GDA",
-    ),
-    pool_pre_ping=True,
+    config.GDA_DATABASE_URL,
+    pool_pre_ping=config.DATABASE_POOL_PRE_PING,
 )
 
 engine1 = create_engine(
-    get_db_url(
-        "equis_v2_url",
-        "EQUIS_V2_DATABASE_URL",
-        "postgresql://gda_prod:Cea2025.!@172.20.4.17:5432/EQUIS_V2",
-    ),
-    pool_pre_ping=True,
+    config.EQUIS_V2_DATABASE_URL,
+    pool_pre_ping=config.DATABASE_POOL_PRE_PING,
 )
 
 
@@ -133,7 +118,7 @@ def parsear_fecha_chile(valor):
 # ==========================
 # CARGA DE DATOS
 # ==========================
-@st.cache_data(ttl=300)
+@st.cache_data(ttl=config.CACHE_TTL_LONG)
 def cargar_proyectos():
     query = """
     SELECT cliente, codigo_proyecto, estado
@@ -144,7 +129,7 @@ def cargar_proyectos():
     return pd.read_sql(query, con=engine)
 
 
-@st.cache_data(ttl=300)
+@st.cache_data(ttl=config.CACHE_TTL_LONG)
 def cargar_metodologias_equis():
     query = """
     SELECT descripcion
@@ -156,7 +141,7 @@ def cargar_metodologias_equis():
     return df["descripcion"].dropna().unique().tolist()
 
 
-@st.cache_data(ttl=300)
+@st.cache_data(ttl=config.CACHE_TTL_LONG)
 def cargar_colaboradores():
     query = """
     SELECT nombre, cargo, correo
@@ -172,7 +157,7 @@ def cargar_colaboradores():
     ].copy()
 
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=config.CACHE_TTL_SHORT)
 def cargar_monitoreos_proyecto(cliente, proyecto):
     query = """
     SELECT
@@ -207,7 +192,7 @@ def cargar_monitoreos_proyecto(cliente, proyecto):
     )
 
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=config.CACHE_TTL_SHORT)
 def cargar_nombres_monitoreos(cliente, proyecto):
     query = """
     SELECT nombre_monitoreo
@@ -224,7 +209,7 @@ def cargar_nombres_monitoreos(cliente, proyecto):
     return df["nombre_monitoreo"].dropna().tolist()
 
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=config.CACHE_TTL_SHORT)
 def cargar_campanas_monitoreo(cliente, proyecto, monitoreo):
     query = """
     SELECT
@@ -272,7 +257,7 @@ def cargar_campanas_monitoreo(cliente, proyecto, monitoreo):
     )
 
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=config.CACHE_TTL_SHORT)
 def cargar_estaciones_monitoreo(cliente, proyecto, monitoreo):
     query = """
     SELECT
@@ -1262,7 +1247,7 @@ def render():
                     )
 
                     folium.TileLayer(
-                        tiles="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+                        tiles=config.ARCGIS_WORLD_IMAGERY_URL,
                         attr="Esri",
                         name="Esri Satellite",
                         overlay=False,

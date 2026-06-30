@@ -4,6 +4,7 @@ import pandas as pd
 import streamlit as st
 from sqlalchemy import create_engine
 
+import config
 import variables as vars
 from auth import AuthenticationError, logout, require_authentication
 
@@ -12,17 +13,15 @@ from auth import AuthenticationError, logout, require_authentication
 # CONFIG GENERAL
 # ==========================
 st.set_page_config(
-    page_title="Gestión CDP",
+    page_title=config.APP_NAME,
     layout="wide",
-    page_icon="images/favicon-32x32.png",
+    page_icon=config.APP_PAGE_ICON,
 )
 
 # ==========================
 # DB
 # ==========================
-engine = create_engine(
-    "postgresql://gda_prod:Cea2025.!@172.20.4.17:5432/GDA"
-)
+engine = create_engine(config.GDA_DATABASE_URL, pool_pre_ping=config.DATABASE_POOL_PRE_PING)
 
 
 # ==========================
@@ -49,7 +48,7 @@ def limpiar_fondo_login():
     )
 
 
-@st.cache_data(ttl=300)
+@st.cache_data(ttl=config.CACHE_TTL_LONG)
 def cargar_usuarios():
     query = """
     SELECT *
@@ -189,9 +188,9 @@ def main():
     cargar_autorizacion_sso(identity["username"])
 
     st.logo(
-        "images/LogoCDP.png",
+        config.APP_LOGO,
         size="large",
-        icon_image="images/LogoCDP.png",
+        icon_image=config.APP_LOGO,
     )
 
     limpiar_fondo_login()

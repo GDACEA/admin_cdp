@@ -2,15 +2,14 @@ import streamlit as st
 import pandas as pd
 import json
 from sqlalchemy import create_engine, text
+import config
 import variables as vars
 
 
 # ==========================
 # DB
 # ==========================
-engine = create_engine(
-    "postgresql://gda_prod:Cea2025.!@172.20.4.17:5432/GDA"
-)
+engine = create_engine(config.GDA_DATABASE_URL, pool_pre_ping=config.DATABASE_POOL_PRE_PING)
 
 
 # ==========================
@@ -111,7 +110,7 @@ def es_usuario_logueado(row):
 # ==========================
 # DATA
 # ==========================
-@st.cache_data(ttl=300)
+@st.cache_data(ttl=config.CACHE_TTL_LONG)
 def cargar_personas():
     query = """
     SELECT
@@ -129,7 +128,7 @@ def cargar_personas():
     return pd.read_sql(query, con=engine)
 
 
-@st.cache_data(ttl=300)
+@st.cache_data(ttl=config.CACHE_TTL_LONG)
 def cargar_proyectos():
     query = """
     SELECT

@@ -47,11 +47,14 @@ def _config() -> dict[str, Any]:
     if not domains:
         raise AuthenticationError("ALLOWED_EMAIL_DOMAINS no contiene dominios válidos.")
     try:
-        session_max_age = int(os.getenv("AUTH_SESSION_MAX_AGE_SECONDS", "3600"))
+        session_max_age = int(_required_env("AUTH_SESSION_MAX_AGE_SECONDS"))
+        state_max_age = int(_required_env("AUTH_STATE_MAX_AGE_SECONDS"))
     except ValueError as exc:
         raise AuthenticationError("AUTH_SESSION_MAX_AGE_SECONDS debe ser un entero.") from exc
     if session_max_age <= 0:
         raise AuthenticationError("AUTH_SESSION_MAX_AGE_SECONDS debe ser mayor que cero.")
+    if state_max_age <= 0:
+        raise AuthenticationError("AUTH_STATE_MAX_AGE_SECONDS debe ser mayor que cero.")
 
     return {
         "client_id": _required_env("MICROSOFT_CLIENT_ID"),
@@ -61,9 +64,10 @@ def _config() -> dict[str, Any]:
         "domains": domains,
         "redirect_uri": _required_env("MICROSOFT_REDIRECT_URI"),
         "app_base_url": _required_env("APP_BASE_URL").rstrip("/"),
-        "authority": f"https://login.microsoftonline.com/{tenant_id}",
-        "issuer": f"https://login.microsoftonline.com/{tenant_id}/v2.0",
+        "authority": f"{_required_env('MICROSOFT_AUTHORITY_BASE_URL').rstrip('/')}/{tenant_id}",
+        "issuer": f"{_required_env('MICROSOFT_AUTHORITY_BASE_URL').rstrip('/')}/{tenant_id}/v2.0",
         "session_max_age": session_max_age,
+        "state_max_age": state_max_age,
     }
 
 
@@ -124,7 +128,7 @@ def _validate_state(state: str, config: dict[str, Any]) -> dict[str, Any]:
         padded = encoded + "=" * (-len(encoded) % 4)
         payload = json.loads(base64.urlsafe_b64decode(padded).decode("utf-8"))
         age = int(time.time()) - int(payload["iat"])
-        if age < 0 or age > 600 or not payload.get("nonce"):
+        if age < 0 or age > config["state_max_age"] or not payload.get("nonce"):
             raise ValueError
         return payload
     except (ValueError, TypeError, KeyError, json.JSONDecodeError) as exc:
