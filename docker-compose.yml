@@ -11,5 +11,8 @@ services:
 
 networks:
   webapp_cdp_static_net:
-    external: true
     name: webapp_cdp_static_net
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.29.240.0/24
