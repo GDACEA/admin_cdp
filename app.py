@@ -1,5 +1,3 @@
-import base64
-import hashlib
 import importlib
 
 import pandas as pd
@@ -7,6 +5,7 @@ import streamlit as st
 from sqlalchemy import create_engine
 
 import variables as vars
+from auth import AuthenticationError, logout, require_authentication
 
 
 # ==========================
@@ -17,13 +16,6 @@ st.set_page_config(
     layout="wide",
     page_icon="images/favicon-32x32.png",
 )
-
-st.logo(
-    "images/LogoCDP.png",
-    size="large",
-    icon_image="images/LogoCDP.png",
-)
-
 
 # ==========================
 # DB
@@ -36,35 +28,6 @@ engine = create_engine(
 # ==========================
 # HELPERS
 # ==========================
-def add_bg_from_local(image_file):
-    with open(image_file, "rb") as f:
-        encoded = base64.b64encode(f.read()).decode()
-
-    st.markdown(
-        f"""
-        <style>
-        [data-testid="stAppViewContainer"] {{
-            background: url("data:image/png;base64,{encoded}") no-repeat top center fixed;
-            background-size: cover;
-        }}
-
-        [data-testid="stAppViewContainer"]::before {{
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: rgba(0,0,0,0.45);
-            z-index: 0;
-        }}
-
-        .main, .block-container {{
-            background-color: transparent !important;
-        }}
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
-
-
 def limpiar_fondo_login():
     st.markdown(
         """
@@ -104,8 +67,6 @@ def inicializar_session_state():
         "cargo": None,
         "permits_json": {},
         "permits_projects": {},
-        "login_username": "",
-        "login_password": "",
     }
 
     for key, value in defaults.items():
@@ -113,100 +74,28 @@ def inicializar_session_state():
             st.session_state[key] = value
 
 
-def login():
-    add_bg_from_local("images/home_upload_2.jpeg")
-
+def cargar_autorizacion_sso(username):
+    """Carga sin cambios el rol y los permisos internos del usuario Entra."""
     df_people = cargar_usuarios()
-
     users_validos = df_people[
         df_people["cargo"].isin(["ADMIN"] + vars.cargos_gestores_proyecto)
     ].copy()
-
-    left, center, right = st.columns([1, 2, 1])
-
-    with center:
-        with st.container(border=True):
-            st.title("Iniciar sesión")
-
-            with st.form("login_form", clear_on_submit=False):
-                username = st.text_input(
-                    "Usuario",
-                    key="login_username",
-                    autocomplete="username",
-                )
-
-                password = st.text_input(
-                    "Contraseña",
-                    type="password",
-                    key="login_password",
-                    autocomplete="current-password",
-                )
-
-                submitted = st.form_submit_button(
-                    "Ingresar",
-                    use_container_width=True,
-                )
-
-            if submitted:
-                username = username.strip()
-
-                existe_usuario = username in users_validos["usuario"].values
-
-                if not existe_usuario:
-                    st.error("Usuario o contraseña incorrectos")
-                    return
-
-                user_row = users_validos.loc[
-                    users_validos["usuario"] == username
-                ].iloc[0]
-
-                password_hash = hashlib.sha256(
-                    password.encode("utf-8")
-                ).hexdigest()
-
-                if user_row["contraseña"] != password_hash:
-                    st.error("Usuario o contraseña incorrectos")
-                    return
-
-                st.session_state["authenticated"] = True
-                st.session_state["user"] = username
-                st.session_state["cargo"] = user_row["cargo"]
-                st.session_state["admin"] = (
-                    username == "admin" or user_row["cargo"] == "ADMIN"
-                )
-
-                st.session_state["permits_json"] = user_row.get(
-                    "permisos_clientes",
-                    {},
-                )
-
-                st.session_state["permits_projects"] = user_row.get(
-                    "permisos",
-                    {},
-                )
-
-                st.success(f"Bienvenido/a {username}")
-                st.rerun()
-
-
-def cerrar_sesion():
-    claves_a_limpiar = [
-        "authenticated",
-        "admin",
-        "user",
-        "cargo",
-        "permits_json",
-        "permits_projects",
-        "main_navigation",
-        "login_username",
-        "login_password",
+    coincidencias = users_validos[
+        users_validos["usuario"].astype(str).str.strip().str.lower() == username
     ]
 
-    for key in claves_a_limpiar:
-        if key in st.session_state:
-            del st.session_state[key]
+    if coincidencias.empty:
+        st.error("Tu cuenta está autenticada, pero no tiene acceso habilitado en CDP.")
+        st.stop()
 
-    st.rerun()
+    user_row = coincidencias.iloc[0]
+    st.session_state["user"] = username
+    st.session_state["cargo"] = user_row["cargo"]
+    st.session_state["admin"] = (
+        username == "admin" or user_row["cargo"] == "ADMIN"
+    )
+    st.session_state["permits_json"] = user_row.get("permisos_clientes", {})
+    st.session_state["permits_projects"] = user_row.get("permisos", {})
 
 
 def obtener_paginas_disponibles():
@@ -290,11 +179,20 @@ def cargar_vista(selected_page):
 # APP
 # ==========================
 def main():
-    inicializar_session_state()
-
-    if not st.session_state["authenticated"]:
-        login()
+    try:
+        identity = require_authentication()
+    except AuthenticationError as exc:
+        st.error(str(exc))
         st.stop()
+
+    inicializar_session_state()
+    cargar_autorizacion_sso(identity["username"])
+
+    st.logo(
+        "images/LogoCDP.png",
+        size="large",
+        icon_image="images/LogoCDP.png",
+    )
 
     limpiar_fondo_login()
 
@@ -307,7 +205,7 @@ def main():
         st.subheader("Sesión")
 
         if st.button("Cerrar sesión", use_container_width=True):
-            cerrar_sesion()
+            logout()
 
 
 if __name__ == "__main__":
