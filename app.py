@@ -133,13 +133,13 @@ def render_sidebar():
     ]
 
     with st.sidebar:
-        st.caption("Usuario")
-        st.write(f"**{st.session_state.get('user', '')}**")
+        # st.caption("Usuario")
+        # st.write(f"**{st.session_state.get('user', '')}**")
 
-        st.caption("Cargo")
-        st.write(f"**{st.session_state.get('cargo', '')}**")
+        # st.caption("Cargo")
+        # st.write(f"**{st.session_state.get('cargo', '')}**")
 
-        st.write("---")
+        # st.write("---")
 
         st.subheader("Menú")
 
