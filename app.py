@@ -61,12 +61,34 @@ def limpiar_fondo_login():
             padding: 1rem 0.75rem 1.25rem !important;
         }
 
+        button,
+        input[type="submit"],
+        input[type="button"],
+        .stButton>button,
+        .stDownloadButton button,
         [data-testid="stSidebar"] .stButton>button,
-        [data-testid="stSidebar"] button {
+        [data-testid="stSidebar"] button,
+        [data-testid="stAppViewContainer"] button {
             background-color: rgb(0, 47, 203) !important;
             color: #ffffff !important;
             border-color: rgba(0, 47, 203, 0.75) !important;
             box-shadow: none !important;
+        }
+
+        input[type="checkbox"],
+        input[type="radio"] {
+            accent-color: rgb(0, 47, 203) !important;
+            border-color: rgb(0, 47, 203) !important;
+        }
+
+        [data-testid="stDataEditor"] [aria-selected="true"],
+        [data-testid="stDataEditor"] [data-selected="true"],
+        [data-testid="stDataEditor"] [role="gridcell"][aria-selected="true"],
+        [data-testid="stDataEditor"] [role="gridcell"][data-selected="true"] {
+            outline: 2px solid rgb(0, 47, 203) !important;
+            border-color: rgb(0, 47, 203) !important;
+            box-shadow: inset 0 0 0 1px rgb(0, 47, 203) !important;
+            background-color: rgba(0, 47, 203, 0.08) !important;
         }
 
         [data-testid="stSidebar"] .stRadio>div>div>label,
@@ -87,6 +109,51 @@ def limpiar_fondo_login():
             margin-top: auto !important;
             padding-top: 1rem !important;
             border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+            order: 999 !important;
+        }
+
+        [data-testid="stSidebar"] .sidebar-user-profile-row {
+            display: flex !important;
+            align-items: center !important;
+            gap: 0.75rem !important;
+        }
+
+        [data-testid="stSidebar"] .sidebar-user-profile-avatar,
+        [data-testid="stSidebar"] .sidebar-user-profile-avatar .avatar-img,
+        [data-testid="stSidebar"] .sidebar-user-profile-avatar .avatar-placeholder {
+            width: 56px !important;
+            height: 56px !important;
+            min-width: 56px !important;
+            min-height: 56px !important;
+            border-radius: 50% !important;
+            overflow: hidden !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            background: rgba(255, 255, 255, 0.08) !important;
+        }
+
+        [data-testid="stSidebar"] .sidebar-user-profile-avatar .avatar-img {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+            border-radius: 50% !important;
+        }
+
+        [data-testid="stSidebar"] .sidebar-user-profile-avatar .avatar-placeholder {
+            color: #ffffff !important;
+            font-weight: 700 !important;
+            font-size: 1rem !important;
+        }
+
+        [data-testid="stSidebar"] .sidebar-user-profile .user-name {
+            color: #ffffff !important;
+            font-weight: 700 !important;
+        }
+
+        [data-testid="stSidebar"] .sidebar-user-profile .user-email {
+            color: rgba(255, 255, 255, 0.72) !important;
+            font-size: 0.9rem !important;
         }
 
         [data-testid="stSidebar"] input,
@@ -100,31 +167,6 @@ def limpiar_fondo_login():
 
         [data-testid="stAppViewContainer"] a {
             color: rgb(0, 47, 203) !important;
-        }
-
-        [data-testid="stSidebar"] .sidebar-user-profile {
-            order: 999 !important;
-            margin-top: 1rem !important;
-            padding-top: 1rem !important;
-            border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
-        }
-
-        [data-testid="stSidebar"] .sidebar-user-profile .avatar,
-        [data-testid="stSidebar"] .sidebar-user-profile .avatar img {
-            width: 56px !important;
-            height: 56px !important;
-            border-radius: 50% !important;
-            object-fit: cover !important;
-        }
-
-        [data-testid="stSidebar"] .sidebar-user-profile .user-name {
-            color: #ffffff !important;
-            font-weight: 700 !important;
-        }
-
-        [data-testid="stSidebar"] .sidebar-user-profile .user-email {
-            color: rgba(255, 255, 255, 0.72) !important;
-            font-size: 0.9rem !important;
         }
         </style>
         """,
@@ -232,40 +274,47 @@ def render_sidebar():
 
 
 def render_sidebar_profile():
+    name = st.session_state.get("name") or st.session_state.get("display_name") or "Usuario"
+    email = st.session_state.get("email", "")
+    photo = st.session_state.get("profile_photo")
+
+    if photo:
+        encoded_photo = base64.b64encode(photo).decode("ascii")
+        avatar_html = (
+            f'<img src="data:image/jpeg;base64,{encoded_photo}" '
+            'class="avatar-img" alt="Foto de perfil">'
+        )
+    else:
+        initials = "".join(part[0] for part in name.split()[:2] if part).upper() or "U"
+        avatar_html = (
+            '<div class="avatar-placeholder">'
+            f'{html.escape(initials)}'
+            '</div>'
+        )
+
+    profile_html = f"""
+    <div class='sidebar-user-profile'>
+        <div class='sidebar-user-profile-row'>
+            <div class='sidebar-user-profile-avatar'>
+                {avatar_html}
+            </div>
+            <div class='sidebar-user-profile-details'>
+                <div class='user-name'>{html.escape(name)}</div>
+                {'<div class="user-email">' + html.escape(email) + '</div>' if email else ''}
+            </div>
+        </div>
+    </div>
+    """
+
     with st.sidebar:
-        st.markdown("<div class='sidebar-user-profile'>", unsafe_allow_html=True)
-        avatar_col, details_col = st.columns([1, 3], vertical_alignment="center")
-        name = st.session_state.get("name") or st.session_state.get("display_name") or "Usuario"
-        email = st.session_state.get("email", "")
-        photo = st.session_state.get("profile_photo")
-        with avatar_col:
-            if photo:
-                encoded_photo = base64.b64encode(photo).decode("ascii")
-                st.markdown(
-                    f'<img src="data:image/jpeg;base64,{encoded_photo}" '
-                    'class="avatar" alt="Foto de perfil">',
-                    unsafe_allow_html=True,
-                )
-            else:
-                initials = "".join(part[0] for part in name.split()[:2] if part).upper() or "U"
-                st.markdown(
-                    '<div class="avatar" style="background: rgba(255,255,255,0.08); color: #ffffff; '
-                    'display:flex;align-items:center;justify-content:center;font-weight:700;">'
-                    f'{html.escape(initials)}</div>',
-                    unsafe_allow_html=True,
-                )
-        with details_col:
-            st.markdown(f'<div class="user-name">{html.escape(name)}</div>', unsafe_allow_html=True)
-            if email:
-                st.markdown(f'<div class="user-email">{html.escape(email)}</div>', unsafe_allow_html=True)
-
+        st.markdown(profile_html, unsafe_allow_html=True)
         if st.session_state.get("graph_notice"):
-            st.markdown(f'<div class="user-email">{html.escape(st.session_state["graph_notice"])}</div>', unsafe_allow_html=True)
-
+            st.markdown(
+                f'<div class="user-email">{html.escape(st.session_state["graph_notice"])}</div>',
+                unsafe_allow_html=True,
+            )
         if st.button("Cerrar sesión", use_container_width=True):
             logout()
-
-        st.markdown("</div>", unsafe_allow_html=True)
 
 
 def cargar_vista(selected_page):
