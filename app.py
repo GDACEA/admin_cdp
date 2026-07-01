@@ -313,7 +313,7 @@ def render_sidebar_profile():
                 f'<div class="user-email">{html.escape(st.session_state["graph_notice"])}</div>',
                 unsafe_allow_html=True,
             )
-        if st.button("Cerrar sesión", use_container_width=True):
+        if st.button("Cerrar Sesión", use_container_width=True):
             logout()
 
 
