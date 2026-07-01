@@ -81,6 +81,16 @@ def limpiar_fondo_login():
             border-color: rgb(0, 47, 203) !important;
         }
 
+        [data-testid="stSidebar"] .stRadio input[type="radio"] {
+            accent-color: rgb(0, 47, 203) !important;
+            border-color: rgb(0, 47, 203) !important;
+        }
+
+        [data-testid="stSidebar"] .stRadio input[type="radio"]:checked + label::before {
+            border-color: rgb(0, 47, 203) !important;
+            background-color: rgba(0, 47, 203, 0.18) !important;
+        }
+
         [data-testid="stDataEditor"] [aria-selected="true"],
         [data-testid="stDataEditor"] [data-selected="true"],
         [data-testid="stDataEditor"] [role="gridcell"][aria-selected="true"],
@@ -107,6 +117,7 @@ def limpiar_fondo_login():
 
         [data-testid="stSidebar"] .sidebar-user-profile {
             margin-top: auto !important;
+            margin-bottom: 1rem !important;
             padding-top: 1rem !important;
             border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
             order: 999 !important;
