@@ -33,8 +33,13 @@ def limpiar_fondo_login():
     st.markdown(
         """
         <style>
+        :root {
+            color-scheme: dark;
+        }
+
         [data-testid="stAppViewContainer"] {
-            background: none !important;
+            background: #050816 !important;
+            color: #f8fafc !important;
         }
 
         [data-testid="stAppViewContainer"]::before {
@@ -42,7 +47,84 @@ def limpiar_fondo_login():
         }
 
         .main, .block-container {
-            background-color: transparent !important;
+            background-color: rgba(5, 8, 20, 0.94) !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.24) !important;
+        }
+
+        [data-testid="stSidebar"] > div:first-child {
+            background: #070b19 !important;
+            color: #f8fafc !important;
+            display: flex !important;
+            flex-direction: column !important;
+            min-height: 100vh !important;
+            padding: 1rem 0.75rem 1.25rem !important;
+        }
+
+        [data-testid="stSidebar"] .stButton>button,
+        [data-testid="stSidebar"] button {
+            background-color: rgb(0, 47, 203) !important;
+            color: #ffffff !important;
+            border-color: rgba(0, 47, 203, 0.75) !important;
+            box-shadow: none !important;
+        }
+
+        [data-testid="stSidebar"] .stRadio>div>div>label,
+        [data-testid="stSidebar"] .stRadio>div>div>div {
+            color: #f8fafc !important;
+        }
+
+        [data-testid="stSidebar"] .stSelectbox>div>div,
+        [data-testid="stSidebar"] input,
+        [data-testid="stSidebar"] textarea,
+        [data-testid="stSidebar"] select {
+            background-color: rgba(255, 255, 255, 0.05) !important;
+            color: #f8fafc !important;
+            border-color: rgba(255, 255, 255, 0.14) !important;
+        }
+
+        [data-testid="stSidebar"] .sidebar-user-profile {
+            margin-top: auto !important;
+            padding-top: 1rem !important;
+            border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+        }
+
+        [data-testid="stSidebar"] input,
+        [data-testid="stSidebar"] textarea,
+        [data-testid="stSidebar"] select,
+        [data-testid="stSidebar"] .stSelectbox>div>div {
+            background-color: rgba(255, 255, 255, 0.04) !important;
+            color: #f8fafc !important;
+            border-color: rgba(255, 255, 255, 0.12) !important;
+        }
+
+        [data-testid="stAppViewContainer"] a {
+            color: rgb(0, 47, 203) !important;
+        }
+
+        [data-testid="stSidebar"] .sidebar-user-profile {
+            order: 999 !important;
+            margin-top: 1rem !important;
+            padding-top: 1rem !important;
+            border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+        }
+
+        [data-testid="stSidebar"] .sidebar-user-profile .avatar,
+        [data-testid="stSidebar"] .sidebar-user-profile .avatar img {
+            width: 56px !important;
+            height: 56px !important;
+            border-radius: 50% !important;
+            object-fit: cover !important;
+        }
+
+        [data-testid="stSidebar"] .sidebar-user-profile .user-name {
+            color: #ffffff !important;
+            font-weight: 700 !important;
+        }
+
+        [data-testid="stSidebar"] .sidebar-user-profile .user-email {
+            color: rgba(255, 255, 255, 0.72) !important;
+            font-size: 0.9rem !important;
         }
         </style>
         """,
@@ -133,14 +215,6 @@ def render_sidebar():
     ]
 
     with st.sidebar:
-        # st.caption("Usuario")
-        # st.write(f"**{st.session_state.get('user', '')}**")
-
-        # st.caption("Cargo")
-        # st.write(f"**{st.session_state.get('cargo', '')}**")
-
-        # st.write("---")
-
         st.subheader("Menú")
 
         selected_label = st.radio(
@@ -154,7 +228,12 @@ def render_sidebar():
 
         st.write("---")
 
-        # Perfil bajo el último control de navegación.
+        return selected_page
+
+
+def render_sidebar_profile():
+    with st.sidebar:
+        st.markdown("<div class='sidebar-user-profile'>", unsafe_allow_html=True)
         avatar_col, details_col = st.columns([1, 3], vertical_alignment="center")
         name = st.session_state.get("name") or st.session_state.get("display_name") or "Usuario"
         email = st.session_state.get("email", "")
@@ -164,29 +243,29 @@ def render_sidebar():
                 encoded_photo = base64.b64encode(photo).decode("ascii")
                 st.markdown(
                     f'<img src="data:image/jpeg;base64,{encoded_photo}" '
-                    'style="width:56px;height:56px;border-radius:50%;object-fit:cover" '
-                    'alt="Foto de perfil">',
+                    'class="avatar" alt="Foto de perfil">',
                     unsafe_allow_html=True,
                 )
             else:
                 initials = "".join(part[0] for part in name.split()[:2] if part).upper() or "U"
                 st.markdown(
-                    '<div style="width:56px;height:56px;border-radius:50%;background:#e5e7eb;'
-                    'display:flex;align-items:center;justify-content:center;font-weight:700;'
-                    f'color:#374151" aria-label="Avatar">{html.escape(initials)}</div>',
+                    '<div class="avatar" style="background: rgba(255,255,255,0.08); color: #ffffff; '
+                    'display:flex;align-items:center;justify-content:center;font-weight:700;">'
+                    f'{html.escape(initials)}</div>',
                     unsafe_allow_html=True,
                 )
         with details_col:
-            st.markdown(f"**{html.escape(name)}**")
-            st.caption(email)
+            st.markdown(f'<div class="user-name">{html.escape(name)}</div>', unsafe_allow_html=True)
+            if email:
+                st.markdown(f'<div class="user-email">{html.escape(email)}</div>', unsafe_allow_html=True)
 
         if st.session_state.get("graph_notice"):
-            st.caption(st.session_state["graph_notice"])
+            st.markdown(f'<div class="user-email">{html.escape(st.session_state["graph_notice"])}</div>', unsafe_allow_html=True)
 
         if st.button("Cerrar sesión", use_container_width=True):
             logout()
 
-        return selected_page
+        st.markdown("</div>", unsafe_allow_html=True)
 
 
 def cargar_vista(selected_page):
@@ -232,6 +311,7 @@ def main():
     selected_page = render_sidebar()
 
     cargar_vista(selected_page)
+    render_sidebar_profile()
 
 if __name__ == "__main__":
     main()
