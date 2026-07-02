@@ -1247,7 +1247,7 @@ def render():
                         tiles=None,
                         control_scale=True,
                         width="100%",
-                        height="600",
+                        height=430,
                     )
 
                     folium.TileLayer(
@@ -1387,9 +1387,8 @@ def render():
 
                     st_folium(
                         mapa,
-                        use_container_width=False,
-                        width=1000,
-                        height=600,
+                        use_container_width=True,
+                        height=430,
                         key="mapa_estaciones",
                         returned_objects=[],
                     )
