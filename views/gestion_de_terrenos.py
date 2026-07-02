@@ -1163,9 +1163,10 @@ def render():
     st.write("---")
 
     TABLE_HEIGHT = 280
-    MAP_HEIGHT = 430
+    MAP_HEIGHT = 360
+    CONTAINER_HEIGHT = 760
 
-    with st.container(border=True):
+    with st.container(border=True, height=CONTAINER_HEIGHT):
         col_titulo, col_selector, col_boton = st.columns([2, 2, 1])
 
         with col_titulo:
@@ -1264,6 +1265,8 @@ def render():
                         max_zoom=25,
                         tiles=None,
                         control_scale=True,
+                        width="100%",
+                        height=f"{MAP_HEIGHT}px",
                     )
 
                     folium.TileLayer(
@@ -1290,7 +1293,12 @@ def render():
                         lat_cent = row.get("Latitud Central")
                         lon_cent = row.get("Longitud Central")
 
-                        if pd.notna(lat_ini) and pd.notna(lon_ini) and pd.notna(lat_fin) and pd.notna(lon_fin):
+                        if (
+                            pd.notna(lat_ini)
+                            and pd.notna(lon_ini)
+                            and pd.notna(lat_fin)
+                            and pd.notna(lon_fin)
+                        ):
                             start = [lat_ini, lon_ini]
                             end = [lat_fin, lon_fin]
                             bounds.extend([start, end])
