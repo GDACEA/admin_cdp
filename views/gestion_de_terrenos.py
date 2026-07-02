@@ -1284,47 +1284,100 @@ def render():
                                 tooltip=row.get("Estación de muestreo", ""),
                                 popup=folium.Popup(popup_html, max_width=300),
                             ).add_to(mapa)
+
+                            folium.Marker(
+                                location=start,
+                                icon=folium.DivIcon(
+                                    html=(
+                                        '<div style="width:12px;height:12px;background:#002fcb;'
+                                        'border-radius:2px;transform: rotate(0deg);'></div>'
+                                    ),
+                                    icon_size=(12, 12),
+                                    icon_anchor=(6, 6),
+                                ),
+                                tooltip=row.get("Estación de muestreo", ""),
+                            ).add_to(mapa)
+
+                            folium.Marker(
+                                location=end,
+                                icon=folium.DivIcon(
+                                    html=(
+                                        '<div style="width:12px;height:12px;background:#002fcb;'
+                                        'border-radius:2px;transform: rotate(0deg);'></div>'
+                                    ),
+                                    icon_size=(12, 12),
+                                    icon_anchor=(6, 6),
+                                ),
+                                tooltip=row.get("Estación de muestreo", ""),
+                            ).add_to(mapa)
                         elif pd.notna(lat_cent) and pd.notna(lon_cent):
                             location = [lat_cent, lon_cent]
                             bounds.append(location)
                             folium.CircleMarker(
                                 location=location,
-                                radius=7,
-                                color="#ffffff",
+                                radius=8,
+                                color="#002fcb",
                                 fill=True,
                                 fill_color="#002fcb",
                                 fill_opacity=1,
-                                weight=2,
+                                weight=0,
                                 popup=folium.Popup(popup_html, max_width=300),
                                 tooltip=row.get("Estación de muestreo", ""),
+                            ).add_to(mapa)
+                            folium.CircleMarker(
+                                location=location,
+                                radius=5,
+                                color="#ffffff",
+                                fill=True,
+                                fill_color="#ffffff",
+                                fill_opacity=1,
+                                weight=0,
                             ).add_to(mapa)
                         elif pd.notna(lat_ini) and pd.notna(lon_ini):
                             location = [lat_ini, lon_ini]
                             bounds.append(location)
                             folium.CircleMarker(
                                 location=location,
-                                radius=7,
-                                color="#ffffff",
+                                radius=8,
+                                color="#002fcb",
                                 fill=True,
                                 fill_color="#002fcb",
                                 fill_opacity=1,
-                                weight=2,
+                                weight=0,
                                 popup=folium.Popup(popup_html, max_width=300),
                                 tooltip=row.get("Estación de muestreo", ""),
+                            ).add_to(mapa)
+                            folium.CircleMarker(
+                                location=location,
+                                radius=5,
+                                color="#ffffff",
+                                fill=True,
+                                fill_color="#ffffff",
+                                fill_opacity=1,
+                                weight=0,
                             ).add_to(mapa)
                         elif pd.notna(lat_fin) and pd.notna(lon_fin):
                             location = [lat_fin, lon_fin]
                             bounds.append(location)
                             folium.CircleMarker(
                                 location=location,
-                                radius=7,
-                                color="#ffffff",
+                                radius=8,
+                                color="#002fcb",
                                 fill=True,
                                 fill_color="#002fcb",
                                 fill_opacity=1,
-                                weight=2,
+                                weight=0,
                                 popup=folium.Popup(popup_html, max_width=300),
                                 tooltip=row.get("Estación de muestreo", ""),
+                            ).add_to(mapa)
+                            folium.CircleMarker(
+                                location=location,
+                                radius=5,
+                                color="#ffffff",
+                                fill=True,
+                                fill_color="#ffffff",
+                                fill_opacity=1,
+                                weight=0,
                             ).add_to(mapa)
 
                     if bounds:
