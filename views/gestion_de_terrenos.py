@@ -1222,7 +1222,8 @@ def render():
 
                 st.dataframe(
                     df_display_est,
-                    use_container_width=True,
+                    use_container_width=False,
+                    width=1000,
                     hide_index=True
                 )
 
@@ -1246,7 +1247,7 @@ def render():
                         max_zoom=25,
                         tiles=None,
                         control_scale=True,
-                        width="100%",
+                        width=1000,
                         height=430,
                     )
 
@@ -1387,7 +1388,8 @@ def render():
 
                     st_folium(
                         mapa,
-                        use_container_width=True,
+                        use_container_width=False,
+                        width=1000,
                         height=430,
                         key="mapa_estaciones",
                         returned_objects=[],
