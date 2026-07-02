@@ -1243,7 +1243,8 @@ def render():
                         location=[lat_centro, lon_centro],
                         zoom_start=13,
                         max_zoom=25,
-                        tiles=None
+                        tiles=None,
+                        control_scale=True,
                     )
 
                     folium.TileLayer(
@@ -1254,6 +1255,7 @@ def render():
                         control=True
                     ).add_to(mapa)
 
+                    bounds = []
                     for _, row in df_mapa.iterrows():
                         popup_html = f"""
                         <b>Sector:</b> {row.get("Sector", "")}<br>
@@ -1261,21 +1263,28 @@ def render():
                         <b>ID estación:</b> {row.get("ID estación", "")}
                         """
 
+                        location = [row["lat_mapa"], row["lon_mapa"]]
+                        bounds.append(location)
+
                         folium.CircleMarker(
-                            location=[row["lat_mapa"], row["lon_mapa"]],
+                            location=location,
                             radius=7,
-                            color="#002fcb",
+                            color="#ffffff",
                             fill=True,
                             fill_color="#002fcb",
-                            fill_opacity=0.9,
+                            fill_opacity=1,
+                            weight=2,
                             popup=folium.Popup(popup_html, max_width=300),
                             tooltip=row.get("Estación de muestreo", ""),
                         ).add_to(mapa)
 
+                    if bounds:
+                        mapa.fit_bounds(bounds, padding=(40, 40))
+
                     st_folium(
                         mapa,
                         use_container_width=True,
-                        height=450,
+                        height=600,
                         key="mapa_estaciones",
                         returned_objects=[],
                     )
