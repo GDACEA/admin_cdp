@@ -391,7 +391,7 @@ def render():
 
             with col_info:
                 st.markdown(
-                    f'<span style="color: #ffffff;">{html.escape(str(row_add['cargo']))} · {html.escape(str(row_add['correo']))}</span>',
+                    f"<span style='color: #ffffff;'>{html.escape(str(row_add['cargo']))} · {html.escape(str(row_add['correo']))}</span>",
                     unsafe_allow_html=True,
                 )
 
