@@ -1162,10 +1162,11 @@ def render():
     # ==========================
     st.write("---")
 
-    TABLE_HEIGHT = 260
+    TABLE_HEIGHT = 280
     MAP_HEIGHT = 360
+    CONTAINER_HEIGHT = 760
 
-    with st.container(border=True):
+    with st.container(border=True, height=CONTAINER_HEIGHT):
         col_titulo, col_selector, col_boton = st.columns([2, 2, 1])
 
         with col_titulo:
