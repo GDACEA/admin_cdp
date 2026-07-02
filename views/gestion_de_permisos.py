@@ -392,10 +392,14 @@ def render():
             with col_info:
                 correo_add = html.escape(str(row_add['correo']))
                 st.markdown(
+                    f"<style>"
+                    f".perm-email-link, .perm-email-link:link, .perm-email-link:visited, "
+                    f".perm-email-link:hover, .perm-email-link:active {{ "
+                    f"color: #ffffff !important; text-decoration: none !important; }}"
+                    f"</style>"
                     f"<span style='color: #ffffff;'>" \
                     f"{html.escape(str(row_add['cargo']))} · " \
-                    f"<a href='mailto:{correo_add}' " \
-                    f"style='color: #ffffff !important; text-decoration: none !important;'>" \
+                    f"<a class='perm-email-link' href='mailto:{correo_add}'>" \
                     f"{correo_add}</a></span>",
                     unsafe_allow_html=True,
                 )
@@ -452,9 +456,13 @@ def render():
                     with col_correo:
                         correo_asignado = html.escape(str(row["correo"]))
                         st.markdown(
+                            f'<style>'
+                            f'.perm-email-link, .perm-email-link:link, .perm-email-link:visited, '
+                            f'.perm-email-link:hover, .perm-email-link:active {{ '
+                            f'color: #ffffff !important; text-decoration: none !important; }}'
+                            f'</style>'
                             f'<span style="color: #ffffff;">'
-                            f'<a href="mailto:{correo_asignado}" '
-                            f'style="color: #ffffff !important; text-decoration: none !important;">'
+                            f'<a class="perm-email-link" href="mailto:{correo_asignado}">'
                             f'{correo_asignado}</a></span>',
                             unsafe_allow_html=True,
                         )
