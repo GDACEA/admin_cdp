@@ -1162,30 +1162,10 @@ def render():
     # ==========================
     st.write("---")
 
-    MAP_WIDTH = 1000
     TABLE_HEIGHT = 280
     MAP_HEIGHT = 430
-    CONTAINER_HEIGHT = 860
 
-    with st.container(border=True, key="contenedor_estaciones"):
-        st.markdown(
-            f"""
-            <style>
-            .st-key-contenedor_estaciones {{
-                max-width: {MAP_WIDTH + 40}px;
-                height: {CONTAINER_HEIGHT}px;
-                max-height: {CONTAINER_HEIGHT}px;
-                overflow: hidden;
-            }}
-
-            .st-key-contenedor_estaciones iframe {{
-                max-height: {MAP_HEIGHT}px !important;
-            }}
-            </style>
-            """,
-            unsafe_allow_html=True
-        )
-
+    with st.container(border=True):
         col_titulo, col_selector, col_boton = st.columns([2, 2, 1])
 
         with col_titulo:
@@ -1245,8 +1225,7 @@ def render():
 
                 st.dataframe(
                     df_display_est,
-                    use_container_width=False,
-                    width=MAP_WIDTH,
+                    use_container_width=True,
                     height=TABLE_HEIGHT,
                     hide_index=True
                 )
@@ -1380,8 +1359,7 @@ def render():
 
                     st_folium(
                         mapa,
-                        use_container_width=False,
-                        width=MAP_WIDTH,
+                        use_container_width=True,
                         height=MAP_HEIGHT,
                         key="mapa_estaciones",
                         returned_objects=[],
