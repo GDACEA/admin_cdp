@@ -1229,15 +1229,16 @@ def render():
                 st.write("#### Mapa de estaciones")
 
                 df_mapa = df_display_est.copy()
-                df_mapa["lat_mapa"] = df_mapa["Latitud Central"].fillna(df_mapa["Latitud inicial"])
-                df_mapa["lon_mapa"] = df_mapa["Longitud Central"].fillna(df_mapa["Longitud inicial"])
-                df_mapa = df_mapa.dropna(subset=["lat_mapa", "lon_mapa"])
+                df_mapa = df_mapa.dropna(subset=["Latitud inicial", "Longitud inicial", "Latitud final", "Longitud final", "Latitud Central", "Longitud Central"], how="all")
 
                 if df_mapa.empty:
                     st.warning("Las estaciones no tienen coordenadas suficientes para desplegar el mapa.")
                 else:
-                    lat_centro = df_mapa["lat_mapa"].mean()
-                    lon_centro = df_mapa["lon_mapa"].mean()
+                    # Calcular el centro inicial con los datos disponibles.
+                    valid_center = df_mapa["Latitud Central"].combine_first(df_mapa["Latitud inicial"])
+                    valid_center_lon = df_mapa["Longitud Central"].combine_first(df_mapa["Longitud inicial"])
+                    lat_centro = valid_center.mean()
+                    lon_centro = valid_center_lon.mean()
 
                     mapa = folium.Map(
                         location=[lat_centro, lon_centro],
@@ -1263,20 +1264,68 @@ def render():
                         <b>ID estación:</b> {row.get("ID estación", "")}
                         """
 
-                        location = [row["lat_mapa"], row["lon_mapa"]]
-                        bounds.append(location)
+                        lat_ini = row.get("Latitud inicial")
+                        lon_ini = row.get("Longitud inicial")
+                        lat_fin = row.get("Latitud final")
+                        lon_fin = row.get("Longitud final")
+                        lat_cent = row.get("Latitud Central")
+                        lon_cent = row.get("Longitud Central")
 
-                        folium.CircleMarker(
-                            location=location,
-                            radius=7,
-                            color="#ffffff",
-                            fill=True,
-                            fill_color="#002fcb",
-                            fill_opacity=1,
-                            weight=2,
-                            popup=folium.Popup(popup_html, max_width=300),
-                            tooltip=row.get("Estación de muestreo", ""),
-                        ).add_to(mapa)
+                        if pd.notna(lat_ini) and pd.notna(lon_ini) and pd.notna(lat_fin) and pd.notna(lon_fin):
+                            start = [lat_ini, lon_ini]
+                            end = [lat_fin, lon_fin]
+                            bounds.extend([start, end])
+                            folium.PolyLine(
+                                locations=[start, end],
+                                color="#002fcb",
+                                weight=4,
+                                opacity=0.75,
+                                dash_array="5, 8",
+                                tooltip=row.get("Estación de muestreo", ""),
+                                popup=folium.Popup(popup_html, max_width=300),
+                            ).add_to(mapa)
+                        elif pd.notna(lat_cent) and pd.notna(lon_cent):
+                            location = [lat_cent, lon_cent]
+                            bounds.append(location)
+                            folium.CircleMarker(
+                                location=location,
+                                radius=7,
+                                color="#ffffff",
+                                fill=True,
+                                fill_color="#002fcb",
+                                fill_opacity=1,
+                                weight=2,
+                                popup=folium.Popup(popup_html, max_width=300),
+                                tooltip=row.get("Estación de muestreo", ""),
+                            ).add_to(mapa)
+                        elif pd.notna(lat_ini) and pd.notna(lon_ini):
+                            location = [lat_ini, lon_ini]
+                            bounds.append(location)
+                            folium.CircleMarker(
+                                location=location,
+                                radius=7,
+                                color="#ffffff",
+                                fill=True,
+                                fill_color="#002fcb",
+                                fill_opacity=1,
+                                weight=2,
+                                popup=folium.Popup(popup_html, max_width=300),
+                                tooltip=row.get("Estación de muestreo", ""),
+                            ).add_to(mapa)
+                        elif pd.notna(lat_fin) and pd.notna(lon_fin):
+                            location = [lat_fin, lon_fin]
+                            bounds.append(location)
+                            folium.CircleMarker(
+                                location=location,
+                                radius=7,
+                                color="#ffffff",
+                                fill=True,
+                                fill_color="#002fcb",
+                                fill_opacity=1,
+                                weight=2,
+                                popup=folium.Popup(popup_html, max_width=300),
+                                tooltip=row.get("Estación de muestreo", ""),
+                            ).add_to(mapa)
 
                     if bounds:
                         mapa.fit_bounds(bounds, padding=(40, 40))
