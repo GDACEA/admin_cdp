@@ -390,8 +390,13 @@ def render():
             ].iloc[0]
 
             with col_info:
+                correo_add = html.escape(str(row_add['correo']))
                 st.markdown(
-                    f"<span style='color: #ffffff;'>{html.escape(str(row_add['cargo']))} · {html.escape(str(row_add['correo']))}</span>",
+                    f"<span style='color: #ffffff;'>" \
+                    f"{html.escape(str(row_add['cargo']))} · " \
+                    f"<a href='mailto:{correo_add}' " \
+                    f"style='color: #ffffff !important; text-decoration: none !important;'>" \
+                    f"{correo_add}</a></span>",
                     unsafe_allow_html=True,
                 )
 
@@ -445,8 +450,12 @@ def render():
                         st.write(nombre_mostrar(row["nombre"]))
 
                     with col_correo:
+                        correo_asignado = html.escape(str(row["correo"]))
                         st.markdown(
-                            f'<span style="color: #ffffff;">{html.escape(str(row["correo"]))}</span>',
+                            f'<span style="color: #ffffff;">'
+                            f'<a href="mailto:{correo_asignado}" '
+                            f'style="color: #ffffff !important; text-decoration: none !important;">'
+                            f'{correo_asignado}</a></span>',
                             unsafe_allow_html=True,
                         )
 
