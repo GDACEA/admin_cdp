@@ -1290,7 +1290,7 @@ def render():
                                 icon=folium.DivIcon(
                                     html=(
                                         '<div style="width:12px;height:12px;background:#002fcb;'
-                                        'border-radius:2px;transform: rotate(0deg);'></div>'
+                                        ' border-radius:2px; transform: rotate(0deg);"></div>'
                                     ),
                                     icon_size=(12, 12),
                                     icon_anchor=(6, 6),
@@ -1303,7 +1303,7 @@ def render():
                                 icon=folium.DivIcon(
                                     html=(
                                         '<div style="width:12px;height:12px;background:#002fcb;'
-                                        'border-radius:2px;transform: rotate(0deg);'></div>'
+                                        ' border-radius:2px; transform: rotate(0deg);"></div>'
                                     ),
                                     icon_size=(12, 12),
                                     icon_anchor=(6, 6),
