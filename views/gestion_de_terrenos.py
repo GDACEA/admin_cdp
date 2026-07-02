@@ -1261,16 +1261,23 @@ def render():
                         <b>ID estación:</b> {row.get("ID estación", "")}
                         """
 
-                        folium.Marker(
+                        folium.CircleMarker(
                             location=[row["lat_mapa"], row["lon_mapa"]],
+                            radius=7,
+                            color="#002fcb",
+                            fill=True,
+                            fill_color="#002fcb",
+                            fill_opacity=0.9,
                             popup=folium.Popup(popup_html, max_width=300),
-                            tooltip=row.get("Estación de muestreo", "")
+                            tooltip=row.get("Estación de muestreo", ""),
                         ).add_to(mapa)
 
                     st_folium(
                         mapa,
                         use_container_width=True,
-                        height=450
+                        height=450,
+                        key="mapa_estaciones",
+                        returned_objects=[],
                     )
 
 
