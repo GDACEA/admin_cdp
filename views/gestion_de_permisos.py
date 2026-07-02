@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import json
+import html
 from sqlalchemy import create_engine, text
 import config
 import variables as vars
@@ -389,7 +390,10 @@ def render():
             ].iloc[0]
 
             with col_info:
-                st.caption(f"{row_add['cargo']} · {row_add['correo']}")
+                st.markdown(
+                    f'<span style="color: #ffffff;">{html.escape(str(row_add['cargo']))} · {html.escape(str(row_add['correo']))}</span>',
+                    unsafe_allow_html=True,
+                )
 
             with col_btn:
                 if st.button(
@@ -441,7 +445,10 @@ def render():
                         st.write(nombre_mostrar(row["nombre"]))
 
                     with col_correo:
-                        st.caption(row["correo"])
+                        st.markdown(
+                            f'<span style="color: #ffffff;">{html.escape(str(row["correo"]))}</span>',
+                            unsafe_allow_html=True,
+                        )
 
                     with col_btn:
                         if puede_quitar:

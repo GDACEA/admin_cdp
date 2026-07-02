@@ -81,14 +81,56 @@ def limpiar_fondo_login():
             border-color: rgb(0, 47, 203) !important;
         }
 
-        [data-testid="stSidebar"] .stRadio input[type="radio"] {
-            accent-color: rgb(0, 47, 203) !important;
+        [data-testid="stSidebar"] .stRadio input[type="radio"],
+        [data-testid="stSidebar"] .stRadio input[type="radio"] + label::before,
+        [data-testid="stSidebar"] .stRadio input[type="radio"] + label::after {
             border-color: rgb(0, 47, 203) !important;
         }
 
-        [data-testid="stSidebar"] .stRadio input[type="radio"]:checked + label::before {
+        [data-testid="stSidebar"] .stRadio input[type="radio"]:checked + label::before,
+        [data-testid="stSidebar"] .stRadio input[type="radio"]:checked + label::after {
+            background-color: rgb(0, 47, 203) !important;
             border-color: rgb(0, 47, 203) !important;
-            background-color: rgba(0, 47, 203, 0.18) !important;
+            box-shadow: 0 0 0 0.15rem rgba(0, 47, 203, 0.24) !important;
+        }
+
+        [data-testid="stSidebar"] .stRadio label,
+        [data-testid="stSidebar"] .stRadio>div>div>label,
+        [data-testid="stSidebar"] .stRadio>div>div>div {
+            color: #f8fafc !important;
+        }
+
+        [data-testid="stSidebar"] .stRadio>div>div>label {
+            display: inline-flex;
+            align-items: center;
+        }
+
+        [data-testid="stSidebar"] .stRadio>div>div>label::before {
+            content: "";
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            margin-right: 0.5rem;
+            flex-shrink: 0;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        [data-testid="stSidebar"] .stRadio>div>div:nth-of-type(1) label::before {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='rgb(0,47,203)' d='M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z'/%3E%3C/svg%3E");
+        }
+
+        [data-testid="stSidebar"] .stRadio>div>div:nth-of-type(2) label::before {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='rgb(0,47,203)' d='M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5zm0 2a3 3 0 0 1 3 3v3H9V7a3 3 0 0 1 3-3zm-5 10h10v6H7v-6z'/%3E%3C/svg%3E");
+        }
+
+        [data-testid="stSidebar"] .stRadio>div>div:nth-of-type(3) label::before {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='rgb(0,47,203)' d='M9 16.2l-3.5-3.5 1.4-1.4L9 13.4l7.1-7.1 1.4 1.4L9 16.2z'/%3E%3C/svg%3E");
+        }
+
+        [data-testid="stSidebar"] .stRadio>div>div:nth-of-type(4) label::before {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='rgb(0,47,203)' d='M19.14 12.94a7.07 7.07 0 0 0 0-1.88l2.03-1.58a.5.5 0 0 0 .12-.63l-1.92-3.32a.5.5 0 0 0-.61-.22l-2.39.96a7.05 7.05 0 0 0-1.62-.94L14.9 2.81a.5.5 0 0 0-.5-.31h-3.8a.5.5 0 0 0-.5.31l-.38 2.42a7.05 7.05 0 0 0-1.62.94l-2.39-.96a.5.5 0 0 0-.61.22L2.7 8.85a.5.5 0 0 0 .12.63l2.03 1.58a7.07 7.07 0 0 0 0 1.88L2.82 14.5a.5.5 0 0 0-.12.63l1.92 3.32c.14.25.44.35.7.22l2.39-.96c.5.37 1.04.66 1.62.94l.38 2.42c.05.28.29.48.57.48h3.8c.28 0 .52-.2.57-.48l.38-2.42c.58-.28 1.12-.57 1.62-.94l2.39.96c.26.11.56.03.7-.22l1.92-3.32a.5.5 0 0 0-.12-.63l-2.03-1.58zM12 15.5A3.5 3.5 0 1 1 15.5 12 3.5 3.5 0 0 1 12 15.5z'/%3E%3C/svg%3E");
         }
 
         [data-testid="stDataEditor"] [aria-selected="true"],
@@ -263,7 +305,7 @@ def render_sidebar():
         st.stop()
 
     labels = [
-        f"{p.get('icon', '')} {p['label']}"
+        p['label']
         for p in pages
     ]
 
